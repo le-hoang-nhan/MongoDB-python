@@ -1,0 +1,17 @@
+from bson.regex import Regex
+
+#Filter for currently-Germany countries of birth. Fill in a string value to be sandwiched between the strings "now" and "$"
+criteria = {"bornCountry": Regex("now Germany\\)$",0)}
+print(set(db.laureates.distinct("bornCountry", criteria)))
+
+
+from bson.regex import Regex
+
+# Save a filter for laureates with prize motivation values containing "transistor" as a substring
+criteria = {"prizes.motivation": Regex("transistor")}
+
+# Save the field names corresponding to a laureate's first name and last name
+first, last = "firstname", "surname"
+print([(laureate[first], laureate[last]) for laureate in db.laureates.find(criteria)])
+
+
