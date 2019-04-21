@@ -1,0 +1,22 @@
+from operator import itemgetter
+
+# Sort by ascending year
+sort_spec = [("year", 1)]
+
+# Construct a cursor over physics prizes
+cursor = db.prizes.find({"category": "physics"}, ["year", "laureates.firstname", "laureates.surname"], sort=sort_spec)
+docs = list(cursor)
+for doc in sorted(docs, key=itemgetter("year")):
+    print("{year}: {first_laureate_surname}".format(
+        year=doc["year"], first_laureate_surname=doc["laureates"][0]["surname"]))
+cursor.rewind() # Rewind cursor to reuse in the next step
+
+# Define a function names() to return a list of formatted names
+def names(doc):
+    formatted_names = ["{firstname} {surname}".format(**laureate)
+          for laureate in sorted(doc["laureates"], key=itemgetter("surname"))]
+    return formatted_names
+
+lines = ["{year}: {names}".format(year=doc["year"], names=" and ".join(names(doc)))
+         for doc in cursor]
+for line in lines: print(line)
