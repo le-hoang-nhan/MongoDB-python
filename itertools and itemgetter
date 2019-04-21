@@ -1,0 +1,18 @@
+import itertools
+from operator import itemgetter
+
+# Save the set of prize categories awarded in 1901
+original_categories = set(db.prizes.distinct("category", {"year": "1901"}))
+
+# Construct a cursor over original-category prizes
+cursor = db.prizes.find({"category": {"$in": list(original_categories)}}, ["category", "year"],
+                        sort=[("year", -1), ("category", 1)])
+
+# Collect entries for missing prize categories
+not_awarded = []
+for key, group in itertools.groupby(cursor, key=itemgetter("year")):
+    year_categories = set(prize["category"] for prize in group)
+    missing = ", ".join(sorted(original_categories - year_categories))
+    if missing: not_awarded.append("{}: {}".format(key, missing))
+
+for line in not_awarded: print(line)
